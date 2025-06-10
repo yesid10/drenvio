@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User, Github, Chrome } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import useAuthStore from "../store/useAuthStore";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +12,13 @@ export default function LoginPage() {
     name: "",
     rememberMe: false,
   });
+  const { login, register, loginWithGoogle, loading, error, user } = useAuthStore();
+  const navigate = useNavigate();
+
+  // Redirigir al home si ya está logueado
+  if (user) {
+    navigate("/home");
+  }
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -19,10 +28,19 @@ export default function LoginPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Aquí iría la lógica de autenticación
+    if (isLogin) {
+      await login(formData.email, formData.password);
+    } else {
+      await register(formData.email, formData.password, formData.name);
+    }
+    // Aquí puedes redirigir o mostrar feedback
+  };
+
+  const handleGoogleLogin = async () => {
+    await loginWithGoogle();
+    // Aquí puedes redirigir o mostrar feedback
   };
 
   const toggleMode = () => {
@@ -60,6 +78,13 @@ export default function LoginPage() {
                 : "Completa los datos para crear tu nueva cuenta"}
             </p>
           </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="mb-4 text-red-600 text-sm text-center font-medium">
+              {error}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -172,8 +197,9 @@ export default function LoginPage() {
             <button
               type="submit"
               className="w-full py-3 px-4 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-900 hover:to-slate-800 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 shadow-sm"
+              disabled={loading}
             >
-              {isLogin ? "Iniciar sesión" : "Crear cuenta"}
+              {loading ? "Cargando..." : isLogin ? "Iniciar sesión" : "Crear cuenta"}
             </button>
           </form>
 
@@ -191,11 +217,20 @@ export default function LoginPage() {
 
           {/* Social buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="flex items-center justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700"
+              disabled={loading}
+            >
               <Chrome className="w-4 h-4 mr-2" />
               Google
             </button>
-            <button className="flex items-center justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700">
+            <button
+              type="button"
+              className="flex items-center justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700"
+              disabled
+            >
               <Github className="w-4 h-4 mr-2" />
               GitHub
             </button>

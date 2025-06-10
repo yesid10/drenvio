@@ -1,7 +1,7 @@
-import React from "react"
-import { Eye, Edit, Trash2 } from "lucide-react"
+import React from "react";
+import { Eye, Edit, Trash2 } from "lucide-react";
 
-const ProductCard = ({ product, formatPrice, calculateDiscountedPrice }) => (
+const ProductCard = ({ product, formatPrice }) => (
   <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-stone-200 overflow-hidden">
     <div className="relative">
       <img
@@ -15,9 +15,9 @@ const ProductCard = ({ product, formatPrice, calculateDiscountedPrice }) => (
             Nuevo
           </span>
         )}
-        {product.descuento > 0 && (
+        {product.precio !== product.precioBase && (
           <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-sm">
-            -{product.descuento}%
+            Oferta
           </span>
         )}
       </div>
@@ -40,20 +40,19 @@ const ProductCard = ({ product, formatPrice, calculateDiscountedPrice }) => (
           {product.marca}
         </span>
       </div>
-
+      <div className="text-xs text-slate-400 mb-1">SKU: {product.sku}</div>
       <p className="text-slate-600 text-sm mb-4 line-clamp-2">
         {product.descripcion}
       </p>
-
       <div className="flex items-center justify-between mb-4">
         <div className="flex flex-col">
-          {product.descuento > 0 ? (
+          {product.precio !== product.precioBase ? (
             <>
               <span className="text-lg font-bold text-emerald-700">
-                {formatPrice(calculateDiscountedPrice(product.precio, product.descuento))}
+                {formatPrice(product.precio)}
               </span>
               <span className="text-sm text-slate-500 line-through">
-                {formatPrice(product.precio)}
+                {formatPrice(product.precioBase)}
               </span>
             </>
           ) : (
@@ -77,7 +76,6 @@ const ProductCard = ({ product, formatPrice, calculateDiscountedPrice }) => (
           </div>
         </div>
       </div>
-
       <div className="flex gap-2">
         <button className="flex-1 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-900 hover:to-slate-800 text-white py-2.5 px-4 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 shadow-sm">
           <Eye size={16} />
@@ -92,6 +90,6 @@ const ProductCard = ({ product, formatPrice, calculateDiscountedPrice }) => (
       </div>
     </div>
   </div>
-)
+);
 
-export default ProductCard
+export default ProductCard;

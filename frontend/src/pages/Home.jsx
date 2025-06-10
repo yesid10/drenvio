@@ -15,6 +15,7 @@ import Loader from "../components/Loader";
 import EmptyState from "../components/EmptyState";
 import FilterBar from "../components/FilterBar";
 import useProductStore from "../store/useProductStore";
+import Navbar from "../components/Navbar";
 
 const Home = () => {
   const {
@@ -132,6 +133,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-slate-50">
+      <Navbar />
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-md shadow-sm border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-6 py-6">

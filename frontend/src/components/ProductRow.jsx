@@ -15,6 +15,7 @@ const ProductRow = ({ product, formatPrice, calculateDiscountedPrice }) => (
             {product.nombre}
           </div>
           <div className="text-sm text-slate-500">{product.marca}</div>
+          <div className="text-xs text-slate-400">SKU: {product.sku}</div>
         </div>
       </div>
     </td>
@@ -24,13 +25,13 @@ const ProductRow = ({ product, formatPrice, calculateDiscountedPrice }) => (
       </span>
     </td>
     <td className="px-6 py-4">
-      {product.descuento > 0 ? (
+      {product.precio !== product.precioBase ? (
         <div className="flex flex-col">
           <span className="font-bold text-emerald-700">
-            {formatPrice(calculateDiscountedPrice(product.precio, product.descuento))}
+            {formatPrice(product.precio)}
           </span>
           <span className="text-sm text-slate-500 line-through">
-            {formatPrice(product.precio)}
+            {formatPrice(product.precioBase)}
           </span>
         </div>
       ) : (
