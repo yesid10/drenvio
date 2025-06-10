@@ -14,7 +14,7 @@ const UserProfile = () => {
     <div className="flex items-center gap-3">
       {user.photoURL && (
         <img
-          src={user.photoURL}
+          src={user.photoURL || "https://img.freepik.com/premium-vector/character-avatar-isolated_729149-194801.jpg?semt=ais_hybrid&w=740"}
           alt={user.displayName || user.email}
           className="w-8 h-8 rounded-full border border-stone-200 shadow-sm"
         />
@@ -25,7 +25,7 @@ const UserProfile = () => {
         </span>
         <button
           onClick={logout}
-          className="text-xs text-slate-500 hover:text-slate-800 underline mt-0.5 text-left"
+          className="text-xs hover:cursor-pointer text-slate-500 hover:text-slate-800 underline mt-0.5 text-left"
         >
           Cerrar sesión
         </button>

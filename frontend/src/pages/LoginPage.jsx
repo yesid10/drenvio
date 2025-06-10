@@ -220,7 +220,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="flex items-center justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700"
+              className="flex items-center hover:cursor-pointer justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700"
               disabled={loading}
             >
               <Chrome className="w-4 h-4 mr-2" />
@@ -228,7 +228,7 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
-              className="flex items-center justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700"
+              className="flex items-center hover:cursor-pointer justify-center py-3 px-4 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 text-slate-700"
               disabled
             >
               <Github className="w-4 h-4 mr-2" />
