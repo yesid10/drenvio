@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require('./db');
 const productosRouter = require('./routes/productos');
 const preciosEspecialesRouter = require('./routes/preciosEspeciales');
+const authRoutes = require("./routes/auth");
 const cors = require('cors');
 
 const app = express();
@@ -16,6 +17,7 @@ app.get('/', (req, res) => {
 
 connectDB();
 
+app.use("/api/auth", authRoutes);
 app.use('/api/productos', productosRouter);
 app.use('/api/precios-especiales', preciosEspecialesRouter);
 
