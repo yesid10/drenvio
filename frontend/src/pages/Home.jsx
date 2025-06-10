@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Search,
   Plus,
@@ -16,6 +16,11 @@ import EmptyState from "../components/EmptyState";
 import FilterBar from "../components/FilterBar";
 import useProductStore from "../store/useProductStore";
 import Navbar from "../components/Navbar";
+import SpecialPriceModal from "../components/SpecialPriceModal";
+import useAuthStore from "../store/useAuthStore";
+import axios from "axios";
+
+const API_URL = "http://localhost:3000/api";
 
 const Home = () => {
   const {
@@ -41,6 +46,33 @@ const Home = () => {
     fetchProducts,
     calculateStats,
   } = useProductStore();
+  const { token, user } = useAuthStore();
+  const [showModal, setShowModal] = useState(false);
+  const [showOnlySpecials, setShowOnlySpecials] = useState(false);
+  const [specialsMap, setSpecialsMap] = useState({});
+
+  // Obtener todos los precios especiales del usuario autenticado
+  useEffect(() => {
+    const fetchSpecials = async () => {
+      if (!token) return;
+      try {
+        const res = await axios.get(`${API_URL}/precios-especiales`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // Filtra solo los del usuario autenticado
+        const userSpecials = res.data.filter((sp) => sp.userUid === user?.uid);
+        // Mapea productoId -> precio especial
+        const map = {};
+        userSpecials.forEach((sp) => {
+          map[sp.productoId] = sp.precio;
+        });
+        setSpecialsMap(map);
+      } catch (e) {
+        setSpecialsMap({});
+      }
+    };
+    fetchSpecials();
+  }, [token, user]);
 
   useEffect(() => {
     fetchProducts();
@@ -112,6 +144,11 @@ const Home = () => {
     calculateStats(filtered);
   };
 
+  const filteredForSpecials = useMemo(() => {
+    if (!showOnlySpecials) return filteredProducts;
+    return filteredProducts.filter((p) => specialsMap[p._id] !== undefined);
+  }, [showOnlySpecials, filteredProducts, specialsMap]);
+
   const getUniqueValues = (key) => {
     return [...new Set(products.map((product) => product[key]))];
   };
@@ -146,14 +183,35 @@ const Home = () => {
                 Administra tu inventario de productos
               </p>
             </div>
-            <button className="bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-900 hover:to-slate-800 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
-              <Plus size={20} />
-              Nuevo Producto
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="bg-gradient-to-r hover:cursor-pointer from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-3 rounded-xl font-medium shadow-sm transition-all duration-200 transform hover:scale-105 flex items-center gap-2"
+                onClick={() => setShowModal(true)}
+              >
+                <DollarSign size={20} />
+                Nuevo Precio Especial
+              </button>
+              <button
+                className={`px-6 py-3 hover:cursor-pointer rounded-xl font-medium shadow-sm transition-all duration-200 flex items-center gap-2 border ${
+                  showOnlySpecials
+                    ? "bg-emerald-50 border-emerald-400 text-emerald-700"
+                    : "bg-white border-stone-200 text-slate-700"
+                }`}
+                onClick={() => setShowOnlySpecials((v) => !v)}
+              >
+                <DollarSign size={20} />
+                Ver solo precios especiales
+              </button>
+            </div>
           </div>
         </div>
       </div>
-
+      <SpecialPriceModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        products={products}
+        formatPrice={formatPrice}
+      />
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Estadísticas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -209,20 +267,31 @@ const Home = () => {
         />
 
         {/* Productos */}
-        {filteredProducts.length === 0 ? (
+        {filteredForSpecials.length === 0 ? (
           <EmptyState
-            message="No se encontraron productos"
-            description="Intenta ajustar los filtros de búsqueda"
-            icon={<Package className="mx-auto text-slate-300 mb-4" size={64} />}
+            message={
+              showOnlySpecials
+                ? "No tienes productos con precio especial"
+                : "No se encontraron productos"
+            }
+            description={
+              showOnlySpecials
+                ? "Asigna precios especiales para verlos aquí"
+                : "Intenta ajustar los filtros de búsqueda"
+            }
+            icon={
+              <Package className="mx-auto text-slate-300 mb-4" size={64} />
+            }
           />
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
+            {filteredForSpecials.map((product) => (
               <ProductCard
                 key={product._id}
                 product={product}
                 formatPrice={formatPrice}
                 calculateDiscountedPrice={calculateDiscountedPrice}
+                tienePrecioEspecial={specialsMap[product._id] !== undefined}
               />
             ))}
           </div>
@@ -252,12 +321,13 @@ const Home = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-200">
-                {filteredProducts.map((product) => (
+                {filteredForSpecials.map((product) => (
                   <ProductRow
                     key={product._id}
                     product={product}
                     formatPrice={formatPrice}
                     calculateDiscountedPrice={calculateDiscountedPrice}
+                    tienePrecioEspecial={specialsMap[product._id] !== undefined}
                   />
                 ))}
               </tbody>

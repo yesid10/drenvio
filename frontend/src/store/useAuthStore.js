@@ -9,8 +9,10 @@ import {
   onAuthStateChanged,
   getIdToken,
 } from "firebase/auth";
+import axios from "axios";
 
 const provider = new GoogleAuthProvider();
+const API_URL = "http://localhost:3000/api"; // Cambia si tu backend está en otro puerto
 
 const useAuthStore = create((set, get) => ({
   user: null,
@@ -25,6 +27,12 @@ const useAuthStore = create((set, get) => ({
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await res.user.updateProfile({ displayName: name });
       const token = await getIdToken(res.user);
+      // Llama al backend para registrar usuario
+      await axios.post(
+        `${API_URL}/auth/login`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       set({ user: res.user, token, loading: false });
       return res.user;
     } catch (error) {
@@ -39,6 +47,12 @@ const useAuthStore = create((set, get) => ({
     try {
       const res = await signInWithEmailAndPassword(auth, email, password);
       const token = await getIdToken(res.user);
+      // Llama al backend para registrar usuario (por si es la primera vez)
+      await axios.post(
+        `${API_URL}/auth/login`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       set({ user: res.user, token, loading: false });
       return res.user;
     } catch (error) {
@@ -52,8 +66,13 @@ const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const res = await signInWithPopup(auth, provider);
-      console.log("Usuario de goole: ",res.user)
       const token = await getIdToken(res.user);
+      // Llama al backend para registrar usuario (por si es la primera vez)
+      await axios.post(
+        `${API_URL}/auth/login`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       set({ user: res.user, token, loading: false });
       return res.user;
     } catch (error) {

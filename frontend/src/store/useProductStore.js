@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import axios from "axios"
+import useAuthStore from "./useAuthStore"
 
 const API_URL = "http://localhost:3000/api" // Cambia el puerto/url según tu backend
 
@@ -47,6 +48,42 @@ const useProductStore = create((set, get) => ({
     const conDescuento = productList.filter((p) => p.descuento > 0).length
     const valorTotal = productList.reduce((sum, p) => sum + p.precio * p.stock, 0)
     set({ stats: { total, enStock, conDescuento, valorTotal } })
+  },
+  fetchPrecioEspecial: async (productoId) => {
+    const { token } = useAuthStore.getState()
+    if (!token) return null
+    try {
+      const res = await axios.get(
+        `${API_URL}/productos/${productoId}/precios-especiales`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      return res.data.precio // null si no hay precio especial
+    } catch (e) {
+      return null
+    }
+  },
+  assignPrecioEspecial: async (productoId, precio) => {
+    const { token } = useAuthStore.getState();
+    if (!token) return false;
+    try {
+      await axios.post(
+        `${API_URL}/precios-especiales`,
+        { productoId, precio },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Notificar a la UI que el precio especial fue actualizado
+      window.dispatchEvent(
+        new CustomEvent('precioEspecialActualizado', {
+          detail: { productId: productoId, precio }
+        })
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+  refreshProducts: async () => {
+    await get().fetchProducts();
   },
 }))
 
