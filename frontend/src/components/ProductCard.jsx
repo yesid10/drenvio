@@ -14,7 +14,6 @@ const ProductCard = ({ product, formatPrice, calculateDiscountedPrice, tienePrec
       if (user) {
         setLoadingPrecio(true);
         const precio = await fetchPrecioEspecial(product._id);
-        console.log("Precio especial obtenido:", precio);
         setPrecioEspecial(precio);
         setLoadingPrecio(false);
       } else {
