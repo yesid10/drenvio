@@ -19,10 +19,12 @@ import Navbar from "../components/Navbar";
 import SpecialPriceModal from "../components/SpecialPriceModal";
 import useAuthStore from "../store/useAuthStore";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:3000/api";
 
 const Home = () => {
+  const navigate = useNavigate();
   const {
     products,
     filteredProducts,
@@ -51,6 +53,14 @@ const Home = () => {
   const [showOnlySpecials, setShowOnlySpecials] = useState(false);
   const [specialsMap, setSpecialsMap] = useState({});
 
+  const handleShowSpecials = () => {
+    if (!token) {
+      navigate('/not-logged-in');
+      return;
+    }
+    setShowOnlySpecials((v) => !v);
+  };
+
   // Obtener todos los precios especiales del usuario autenticado
   useEffect(() => {
     const fetchSpecials = async () => {
@@ -64,14 +74,26 @@ const Home = () => {
         // Mapea productoId -> precio especial
         const map = {};
         userSpecials.forEach((sp) => {
-          map[sp.productoId] = sp.precio;
+          map[sp.productoId] = sp.precioEspecial;
         });
         setSpecialsMap(map);
       } catch (e) {
+        console.error("Error al obtener precios especiales:", e);
         setSpecialsMap({});
       }
     };
     fetchSpecials();
+
+    // Escuchar eventos de actualización de precios especiales
+    const handlePrecioEspecialActualizado = () => {
+      fetchSpecials();
+    };
+
+    window.addEventListener('precioEspecialActualizado', handlePrecioEspecialActualizado);
+
+    return () => {
+      window.removeEventListener('precioEspecialActualizado', handlePrecioEspecialActualizado);
+    };
   }, [token, user]);
 
   useEffect(() => {
@@ -197,7 +219,7 @@ const Home = () => {
                     ? "bg-emerald-50 border-emerald-400 text-emerald-700"
                     : "bg-white border-stone-200 text-slate-700"
                 }`}
-                onClick={() => setShowOnlySpecials((v) => !v)}
+                onClick={handleShowSpecials}
               >
                 <DollarSign size={20} />
                 Ver solo precios especiales
@@ -230,8 +252,8 @@ const Home = () => {
             iconColor="text-emerald-700"
           />
           <StatsCard
-            title="Con Descuento"
-            value={stats.conDescuento}
+            title="Con Precio Especial"
+            value={Object.keys(specialsMap).length}
             icon={<DollarSign />}
             bg="border-amber-200"
             iconColor="text-amber-700"

@@ -51,39 +51,45 @@ const useProductStore = create((set, get) => ({
     },
     fetchPrecioEspecial: async (productoId) => {
         const { token } = useAuthStore.getState()
-        console.log(token)
         if (!token) return null
         try {
             const res = await axios.get(
-                `${API_URL}/productos/${productoId}/precios-especiales`,
-                
-                
+                `${API_URL}/precios-especiales/productos/${productoId}/precios-especiales`,
                 { headers: { Authorization: `Bearer ${token}` } }
             )
-            console.log("Respuesta: ",res)
-            return res.data.precio // null si no hay precio especial
+            return res.data.precio
         } catch (e) {
             return null
         }
     },
     assignPrecioEspecial: async (productoId, precio) => {
-        const { token } = useAuthStore.getState();
-        if (!token) return false;
+        const { token, user } = useAuthStore.getState();
+        const precioNumerico = Number(precio);
+        if (isNaN(precioNumerico)) {
+            return null;
+        }
+
         try {
-            await axios.post(
+            const dataToSend = { 
+                productoId: String(productoId), 
+                precio: precioNumerico,
+                userUid: String(user.uid)
+            };
+            
+            const res = await axios.post(
                 `${API_URL}/precios-especiales`,
-                { productoId, precio },
-                { headers: { Authorization: `Bearer ${token}` } }
+                dataToSend,
+                { 
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    } 
+                }
             );
-            // Notificar a la UI que el precio especial fue actualizado
-            window.dispatchEvent(
-                new CustomEvent('precioEspecialActualizado', {
-                    detail: { productId: productoId, precio }
-                })
-            );
-            return true;
+            window.dispatchEvent(new Event('precioEspecialActualizado'));
+            return res.data;
         } catch (e) {
-            return false;
+            return null;
         }
     },
     refreshProducts: async () => {

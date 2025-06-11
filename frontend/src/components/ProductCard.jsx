@@ -24,8 +24,6 @@ const ProductCard = ({ product, formatPrice, calculateDiscountedPrice, tienePrec
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, product._id]);
 
-  console.log("Precio especial",precioEspecial)
-
   return (
     <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-stone-200 overflow-hidden">
       <div className="relative">

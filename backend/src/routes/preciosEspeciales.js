@@ -1,6 +1,7 @@
 const express = require('express');
 const PreciosEspeciales = require('../models/PreciosEspeciales');
 const authenticateToken = require("../middlewares/authFirebase");
+const mongoose = require('mongoose');
 const router = express.Router();
 
 // Obtener todos los precios especiales (solo admin, opcional)
@@ -66,19 +67,44 @@ router.get('/productos/:id/precios-especiales', authenticateToken, async (req, r
   try {
     const userUid = req.user.uid;
     const { id } = req.params;
+    
     // Log para depuración
     console.log('Buscando precio especial para:', { productoId: id, userUid });
-    // Buscar por productoId como string y como ObjectId
+    
+    // Intentar convertir el ID a ObjectId si es posible
+    let productoId;
+    try {
+      productoId = mongoose.Types.ObjectId(id);
+    } catch (error) {
+      productoId = id;
+    }
+    
+    // Buscar el precio especial
     const precioEspecial = await PreciosEspeciales.findOne({
-      $or: [
-        { productoId: id, userUid },
-        { productoId: (typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) ? require('mongoose').Types.ObjectId(id) : id, userUid }
-      ]
+      productoId,
+      userUid
     });
-    console.log('Resultado de búsqueda:', precioEspecial);
-    res.json({ precio: precioEspecial ? precioEspecial.precioEspecial : null });
+    
+    // Log detallado del resultado
+    console.log('Resultado de búsqueda:', {
+      productoId,
+      userUid,
+      encontrado: !!precioEspecial,
+      precio: precioEspecial?.precioEspecial
+    });
+    
+    if (!precioEspecial) {
+      return res.json({ precio: null });
+    }
+    
+    res.json({ precio: precioEspecial.precioEspecial });
   } catch (error) {
-    res.status(500).json({ error: 'Error al consultar precio especial', detalle: error.message });
+    console.error('Error al consultar precio especial:', error);
+    res.status(500).json({ 
+      error: 'Error al consultar precio especial', 
+      detalle: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
