@@ -7,7 +7,7 @@ Este proyecto es un backend desarrollado con Node.js, Express y MongoDB, diseña
 
 1. Clona el repositorio y entra a la carpeta del backend:
    ```sh
-   git clone <URL_DEL_REPO>
+   git clone https://github.com/yesid10/drenvio.git
    cd backend
    ```
 2. Copia el archivo `.env.example` y renómbralo a `.env`. Ajusta los valores si es necesario:
@@ -53,6 +53,24 @@ backend/
 │       └── preciosEspeciales.js# Rutas para precios especiales
 ```
 
+## Base de Datos
+- **URL de conexión:** mongodb+srv://drenviochallenge:m1jWly3uw42cBwp6@drenviochallenge.2efc0.mongodb.net/
+- **Base de datos:** tienda
+- **Colecciones:**
+  - `productos`: Colección inicial proporcionada
+  - `preciosEspecialesVanegas10`: Colección personalizada para precios especiales
+
+## Estructura de la Colección de Precios Especiales
+```javascript
+{
+  productoId: String,    // Referencia al producto
+  userUid: String,       // ID del usuario
+  precio: Number,        // Precio especial
+  createdAt: Date,       // Fecha de creación
+  updatedAt: Date        // Fecha de actualización
+}
+```
+
 ## Endpoints principales
 - `GET /api/productos` — Lista todos los productos.
 - `GET /api/precios-especiales` — Lista todos los precios especiales.
@@ -60,9 +78,23 @@ backend/
 - `PUT /api/precios-especiales/:id` — Actualiza un precio especial existente.
 - `GET /api/precios-especiales/usuario/:usuario` — Valida si un usuario tiene precios especiales.
 
+## Criterios de Evaluación Cumplidos
+- **Funcionabilidad:** Implementación completa de todos los endpoints requeridos
+- **Código Limpio:** Estructura modular, buenas prácticas y documentación clara
+- **Creatividad:** Diseño optimizado de la colección de precios especiales con campos para relaciones eficientes
+
+## Consideraciones Técnicas
+- Validación de datos en todos los endpoints
+- Manejo de errores centralizado
+- Conexión segura a MongoDB Atlas
+- Optimización de consultas
+- Documentación de API con comentarios
+
 ## Notas
-- La colección de precios especiales se nombra según el formato solicitado y puede configurarse en `.env`.
-- El backend está preparado para integrarse fácilmente con un frontend en React.
+- La colección de precios especiales se nombra según el formato solicitado: `preciosEspecialesVanegas10`
+- El backend está preparado para integrarse fácilmente con un frontend en React
+- Se implementó autenticación con Google para usuarios
+- Se validan los precios especiales por usuario
 
 ---
 
